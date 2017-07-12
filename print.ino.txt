@@ -1,0 +1,20 @@
+#include "platform.h"
+
+// Shared variables
+char msgMain[20];
+char msgCommand[20];
+char msgAnalog[20];
+
+
+void setupPrint()
+{
+  delay(100);
+}
+
+void loopPrint()
+{
+  char msg[20];
+  // Waiting for message, the print
+  Mailbox_pend(mboxHandle, &msg, BIOS_WAIT_FOREVER);
+  Serial.println(msg);
+}

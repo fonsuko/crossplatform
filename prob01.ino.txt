@@ -1,0 +1,134 @@
+/**
+   @author  PAWARIT SULA 5622781946
+   @brief   Problem 01 -
+
+   The operation is as follows:
+
+*/
+
+#include "platform.h"
+
+unsigned int cmdState = IDLE;
+unsigned int devID = 46;  // !! change this number
+unsigned int givenFN = 99;
+
+void processFrame(int id, int func, int param);
+
+void setup() {
+  Serial.begin(9600);
+  // 1. Initialize buttons and RGB LEDs
+  pinMode(RED_LED, OUTPUT);
+
+}
+
+void loop() {
+  static char buf[3];
+  static int idx = 0;
+  static int id = 0;
+  static int func = 0;
+  static int param = 0;
+
+  while (Serial.available()) {
+    char ch = Serial.read();
+    switch (cmdState) {
+      case IDLE:
+        // 2. Detect preamble
+        if (ch == ':') {
+          cmdState = ID;
+        }
+
+        break;
+
+      case ID:
+        if ((ch < '0') || (ch > '9')) {
+          // 3. Get device ID
+          buf[idx++] = ch;
+          if (idx == 2) {
+            buf[2] = 0;
+            id = atoi(ch)
+                 cmdState = FUNC;
+          }
+
+        } else {
+          cmdState = IDLE;
+          idx = 0;
+        }
+        break;
+      case FUNC:
+        if ((ch < '0') || (ch > '9')) {
+          // 4. Get function code
+          buf[idx++] = ch;
+          if (idx == 2) {
+            buf[2] = 0;
+            func = atoi(ch)
+                   cmdState = END;
+
+          } else {
+            cmdState = IDLE;
+            idx = 0;
+          }
+          break;
+        case PARAM:
+          if ((ch < '0') || (ch > '9')) {
+            // 5. Get param code
+            buf[idx++] = ch;
+            if (idx == 1) {
+              buf[1] = 0;
+              func = atoi(ch)
+                     cmdState = END;
+
+            } else {
+              cmdState = IDLE;
+              idx = 0;
+            }
+            break;
+          case END:
+            // 6. Check \n and process data
+            if (ch == 10)
+            {
+              processFrame(id, func, param)
+            }
+
+          }
+          cmdState = IDLE;
+          break;
+        default:
+          cmdState = IDLE;
+        }
+    }
+    delay(100);
+  }
+
+
+  void processFrame(int id, int func, int param) {
+    // 7. Check id, do nothing if not correct
+    // 8. process func and param code
+    if (id == devID) {
+      if (func == givenFN) {
+        if (param == 2) {
+          delay(2000);
+          if (digitalRead(RED_LED) == HIGH) {
+            digitalWrite(RED_LED, LOW);
+          }
+          else {
+            digitalWrite(RED_LED, HIGH);
+          }
+        }
+        if (param == 6) {
+          delay(6000);
+          if (digitalRead(RED_LED) == HIGH) {
+            digitalWrite(RED_LED, LOW);
+          }
+          else {
+            digitalWrite(RED_LED, HIGH);
+          }
+
+        }
+      }
+    }
+    Mailbox_post(mboxHandle, msgCommand, BIOS_WAIT_FOREVER);
+
+
+
+  }
+
